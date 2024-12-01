@@ -10,28 +10,28 @@ class FileType(Enum):
 
 # region Print Functions with colors
 
-def print_error(text, end="\n"):
-    print_colored(text, Fore.RED, end)
+def print_error(*text, end="\n"):
+    print_colored(text, color=Fore.RED, end=end)
 
 
-def print_success(text, end="\n"):
-    print_colored(text, Fore.GREEN, end)
+def print_success(*text, end="\n"):
+    print_colored(text, color=Fore.GREEN, end=end)
 
 
-def print_title(text, end="\n"):
-    print_colored(text, Fore.BLUE, end)
+def print_title(*text, end="\n"):
+    print_colored(text, color=Fore.BLUE, end=end)
 
 
-def print_result(text, end="\n"):
-    print_colored(text, Fore.YELLOW, end)
+def print_result(*text, end="\n"):
+    print_colored(text, color=Fore.YELLOW, end=end)
 
 
-def print_debug(text, end="\n"):
-    print_colored(text, Fore.LIGHTBLUE_EX, end)
+def print_debug(*text, end="\n"):
+    print_colored(text, color=Fore.LIGHTBLUE_EX, end=end)
 
 
-def print_colored(text, color: Fore, end="\n"):
-    print(color + str(text) + Style.RESET_ALL, end=end)
+def print_colored(*text, color: Fore, end="\n"):
+    print(*[color + str(x) + Style.RESET_ALL for x in text[0]], end=end)
 
 
 # endregion
