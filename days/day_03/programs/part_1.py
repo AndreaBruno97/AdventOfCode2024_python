@@ -1,4 +1,5 @@
 from common import *
+import re
 
 
 class Part_1(BaseClass):
@@ -7,11 +8,14 @@ class Part_1(BaseClass):
         super().__init__()
 
     def execute_internal(self, filepath):
-        print(open_file(filepath))
+        memory = open_file(filepath)
+        pattern = r"mul\((\d+),(\d+)\)"
+        match_list = re.findall(pattern, memory)
+        result_list = [int(first) * int(second) for (first, second) in match_list]
 
-        return -1
+        return sum(result_list)
 
 
 p1 = Part_1()
-p1.test(0)
+p1.test(161)
 p1.execute()
