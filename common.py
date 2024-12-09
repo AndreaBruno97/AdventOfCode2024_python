@@ -55,6 +55,10 @@ def open_file_char_array(filename) -> list[str]:
     return list(open_file(filename))
 
 
+def open_file_digit_array(filename) -> list[int]:
+    return [int(x) for x in open_file_char_array(filename)]
+
+
 def open_file_str_matrix(filename) -> list[list[str]]:
     return [list(x) for x in open_file_lines(filename)]
 
