@@ -1,4 +1,5 @@
 from enum import Enum
+import numpy as np
 from colorama import Fore, Style
 
 
@@ -70,6 +71,21 @@ def open_file_int_array(filename) -> list[int]:
 def open_file_int_matrix(filename) -> list[list[int]]:
     return [[int(y) for y in x.strip()] for x in open_file_lines(filename)]
 
+
+def open_file_str_matrix_guarded(filename, border_value="") -> np.array:
+    return guard_matrix(open_file_str_matrix(filename), border_value)
+
+
+def open_file_int_matrix_guarded(filename, border_value=0) -> np.array:
+    return guard_matrix(open_file_int_matrix(filename), border_value)
+
+# endregion
+
+
+# region Utility
+
+def guard_matrix(matrix, border_value) -> np.array:
+    return np.pad(matrix, pad_width=((1, 1), (1, 1)), mode='constant', constant_values=border_value)
 
 # endregion
 
