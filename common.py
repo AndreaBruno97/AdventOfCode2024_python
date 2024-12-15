@@ -123,11 +123,13 @@ class BaseClass:
              solution_in_new_line=False):
 
         print_title("Test:")
-        main_test_result = self.execute(FileType.TEST, solution_in_new_line=solution_in_new_line)
-        if main_test_result != expected_result:
-            print_error("Main test failed")
-        else:
-            print_success("Main test succeeded")
+
+        if expected_result is not None:
+            main_test_result = self.execute(FileType.TEST, solution_in_new_line=solution_in_new_line)
+            if main_test_result != expected_result:
+                print_error("Main test failed")
+            else:
+                print_success("Main test succeeded")
 
         for cur_filename, cur_expected_value in additional_test_list:
             cur_test_result = self.execute(FileType.OTHER, cur_filename, solution_in_new_line=solution_in_new_line)
