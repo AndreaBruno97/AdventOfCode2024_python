@@ -87,6 +87,21 @@ def open_file_int_matrix_guarded(filename, border_value=0) -> np.array:
 def guard_matrix(matrix, border_value) -> np.array:
     return np.pad(matrix, pad_width=((1, 1), (1, 1)), mode='constant', constant_values=border_value)
 
+
+def print_matrix(matrix: list[list[any]], highlight_point: tuple[int, int] = None):
+    rows = len(matrix)
+    cols = len(matrix[0])
+
+    for r in range(rows):
+        for c in range(cols):
+            cur_val = matrix[r][c]
+            if (r, c) == highlight_point:
+                print_result(cur_val, end="")
+            else:
+                print(cur_val, end="")
+
+        print()
+
 # endregion
 
 
