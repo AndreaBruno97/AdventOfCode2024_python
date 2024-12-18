@@ -1,6 +1,9 @@
+import math
+import sys
 from enum import Enum
 import numpy as np
 from colorama import Fore, Style
+from typing import Callable
 
 
 class FileType(Enum):
@@ -79,6 +82,7 @@ def open_file_str_matrix_guarded(filename, border_value="") -> np.array:
 def open_file_int_matrix_guarded(filename, border_value=0) -> np.array:
     return guard_matrix(open_file_int_matrix(filename), border_value)
 
+
 # endregion
 
 
@@ -101,6 +105,72 @@ def print_matrix(matrix: list[list[any]], highlight_point: tuple[int, int] = Non
                 print(cur_val, end="")
 
         print()
+
+
+# INPUT
+# get_neighbors: for a single node, retrieves all neighbors with their weights
+#       input: current node    example: (0, 0)
+#       output: list of neighbors with
+#               - neighbor node
+#               - weight to reach that node
+#                example [[(0,1), 1], [(0, 2), 2]]
+#
+# OUTPUT
+# distance_dict: dictionary with each visited node as key and its minimum
+#               distance from the starting point as value
+# previous_dict: dictionary with each visited node as key and its previous
+#               node in the minimum path as value
+#
+#
+def dijkstra(
+        start_pos: tuple[int, int],
+        get_neighbors: Callable[[tuple[int, int]], list[tuple[tuple[int, int], int]]],
+) -> tuple[dict[tuple[int, int], int], dict[tuple[int, int], tuple[int, int]]]:
+    unvisited_set = set()
+    visited_set = set()
+    distance_dict = dict()
+    previous_dict = dict()
+
+    unvisited_set.add(start_pos)
+    distance_dict[start_pos] = 0
+    previous_dict[start_pos] = start_pos
+
+    def get_distance(cur_pos):
+        return distance_dict[cur_pos] if cur_pos in distance_dict else sys.maxsize
+
+    while len(unvisited_set) > 0:
+        unvisited_distance_dict = {key: val for key, val in distance_dict.items() if key in unvisited_set}
+        min_distance = min(unvisited_distance_dict.values())
+        cur_node = [key for key, val in unvisited_distance_dict.items() if val == min_distance][0]
+        unvisited_set.remove(cur_node)
+        visited_set.add(cur_node)
+
+        for new_node, new_node_weight in get_neighbors(cur_node):
+            if new_node in visited_set:
+                continue
+
+            unvisited_set.add(new_node)
+            cur_distance = get_distance(new_node)
+            new_distance = get_distance(cur_node) + new_node_weight
+
+            if new_distance < cur_distance:
+                distance_dict[new_node] = new_distance
+                previous_dict[new_node] = cur_node
+
+    return distance_dict, previous_dict
+
+
+def print_distances_matrix(distance_dict, rows, cols):
+    size = math.ceil(math.log10(max([x for x in distance_dict.values() if x != sys.maxsize])))
+    for r in range(rows):
+        for c in range(cols):
+            if (r, c) in distance_dict.keys():
+                print(" " + str(distance_dict[(r, c)]).zfill(size) + " ", end="")
+            else:
+                print("." * (size + 2), end="")
+
+        print("")
+
 
 # endregion
 
