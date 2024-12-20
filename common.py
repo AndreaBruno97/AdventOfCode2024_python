@@ -97,14 +97,14 @@ def guard_matrix(matrix, border_value, border_size=1) -> np.array:
     )
 
 
-def print_matrix(matrix: list[list[any]], highlight_point: tuple[int, int] = None):
+def print_matrix(matrix: list[list[any]], highlight_point: tuple[int, int] = None, highlight_list: list[tuple[int, int]] = None):
     rows = len(matrix)
     cols = len(matrix[0])
 
     for r in range(rows):
         for c in range(cols):
             cur_val = matrix[r][c]
-            if (r, c) == highlight_point:
+            if (r, c) == highlight_point or (r, c) in highlight_list:
                 print_result(cur_val, end="")
             else:
                 print(cur_val, end="")
@@ -120,6 +120,11 @@ def print_matrix(matrix: list[list[any]], highlight_point: tuple[int, int] = Non
 #               - weight to reach that node
 #                example [[(0,1), 1], [(0, 2), 2]]
 #
+# update_on_path_find: when a new node is updated, call a lambda to allow the caller
+#                       to perform additional actions
+#       input: current node     example: (0, 0)
+#              new node     example: (0, 0)
+#
 # OUTPUT
 # distance_dict: dictionary with each visited node as key and its minimum
 #               distance from the starting point as value
@@ -130,6 +135,7 @@ def print_matrix(matrix: list[list[any]], highlight_point: tuple[int, int] = Non
 def dijkstra(
         start_pos: tuple[int, int],
         get_neighbors: Callable[[tuple[int, int]], list[tuple[tuple[int, int], int]]],
+        update_on_path_find: Callable[[tuple[int, int], tuple[int, int]], None] = None
 ) -> tuple[dict[tuple[int, int], int], dict[tuple[int, int], tuple[int, int]]]:
     unvisited_set = set()
     visited_set = set()
@@ -161,6 +167,8 @@ def dijkstra(
             if new_distance < cur_distance:
                 distance_dict[new_node] = new_distance
                 previous_dict[new_node] = cur_node
+                if update_on_path_find:
+                    update_on_path_find(cur_node, new_node)
 
     return distance_dict, previous_dict
 
