@@ -22,6 +22,14 @@ delta_directions = dict({
 })
 
 
+direction_from_delta_dict = dict({
+    (0, 1): RIGHT,
+    (1, 0): DOWN,
+    (0, -1): LEFT,
+    (-1, 0): UP
+})
+
+
 class Part_1(BaseClass):
 
     def __init__(self):
@@ -32,10 +40,6 @@ class Part_1(BaseClass):
         rows, cols = len(matrix), len(matrix[0])
         start_pos = (0, 0)
         end_pos = (0, 0)
-        visited_set = set()
-        unvisited_set = set()
-        distance_dict = dict()
-        previous_dict = dict()
         direction_dict = dict()
 
         for r in range(rows):
@@ -46,53 +50,58 @@ class Part_1(BaseClass):
                 if cur_tile == WALL:
                     continue
 
-                unvisited_set.add(cur_coord)
-                distance_dict[cur_coord] = sys.maxsize
-
                 if cur_tile == START:
                     start_pos = cur_coord
-                    distance_dict[cur_coord] = 0
-                    previous_dict[cur_coord] = cur_coord
                     direction_dict[cur_coord] = RIGHT
 
                 if cur_tile == END:
                     end_pos = cur_coord
 
-        while len(unvisited_set) > 0:
-            unvisited_distance_dict = {key: val for key, val in distance_dict.items() if key in unvisited_set}
-            min_distance = min(unvisited_distance_dict.values())
-            cur_node = [key for key, val in unvisited_distance_dict.items() if val == min_distance][0]
-            unvisited_set.remove(cur_node)
+        def get_neighbors(cur_pos):
+            possible_neighbors = [((cur_pos[0] + delta[0], cur_pos[1] + delta[1]), direct)
+                                  for direct, delta in delta_directions.items()]
 
-            for direction, delta_coord in delta_directions.items():
-                delta_r, delta_c = delta_coord
-                new_r, new_c = cur_node[0] + delta_r, cur_node[1] + delta_c
-                new_node = (new_r, new_c)
-                if (matrix[new_r][new_c] == WALL) or (new_node not in unvisited_set):
-                    continue
-                cur_distance = distance_dict[new_node]
-                new_distance = distance_dict[cur_node] + 1
-                if direction_dict[cur_node] != direction:
-                    new_distance += 1000
+            return [
+                ((nei_r, nei_col), 1 if direction_dict[cur_pos] == direct else 1001)
+                for (nei_r, nei_col), direct in possible_neighbors if
+                0 <= nei_r < rows and
+                0 <= nei_col < cols and
+                matrix[nei_r][nei_col] != WALL]
 
-                if new_distance < cur_distance:
-                    distance_dict[new_node] = new_distance
-                    previous_dict[new_node] = cur_node
-                    direction_dict[new_node] = direction
-        #print_distances(distance_dict, rows, cols)
+        def update_direction(cur_pos, new_pos):
+            delta = (new_pos[0] - cur_pos[0], new_pos[1] - cur_pos[1])
+            direction_dict[new_pos] = direction_from_delta_dict[delta]
+
+        distance_dict, previous_dict = dijkstra(start_pos, get_neighbors, update_direction)
+
+        """
+        path_list = []
+        last_pos = end_pos
+        while previous_dict[last_pos] != last_pos:
+            path_list.append(last_pos)
+            last_pos = previous_dict[last_pos]
+        path_list.append(start_pos)
+        path_len = len(path_list) - 1
+
+        turns = 0
+        prev_dir = RIGHT
+        prev = path_list[0]
+        for cur in path_list[1:]:
+            delta = (cur[0] - prev[0], cur[1] - prev[1])
+            cur_dir = direction_from_delta_dict[delta]
+            if cur_dir != prev_dir:
+                turns += 1
+
+            prev_dir = cur_dir
+            prev = cur
+
+        print(turns, path_len)
+        print_distances_matrix(distance_dict, rows, cols)
+        print_matrix(matrix, highlight_list=path_list)
+        return (turns * 1000) + path_len
+        """
+
         return distance_dict[end_pos]
-
-
-def print_distances(distance_dict, rows, cols):
-    size = math.ceil(math.log10(max([x for x in distance_dict.values() if x != sys.maxsize])))
-    for r in range(rows):
-        for c in range(cols):
-            if (r, c) in distance_dict.keys():
-                print(" " + str(distance_dict[(r, c)]).zfill(size) + " ", end="")
-            else:
-                print("." * (size + 2), end="")
-
-        print("")
 
 
 p1 = Part_1()
