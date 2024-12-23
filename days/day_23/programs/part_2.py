@@ -1,4 +1,5 @@
 from common import *
+import itertools
 
 
 class Part_2(BaseClass):
@@ -24,39 +25,32 @@ class Part_2(BaseClass):
             node_set.add(left)
             node_set.add(right)
 
-        sub_lan_set = set()
+        biggest_connected_subset = []
 
-        for cur_node, cur_neighbor_list in lan_map.items():
-            for cur_neigh in cur_neighbor_list:
-                for neigh_neighbor in lan_map[cur_neigh]:
-                    if neigh_neighbor in cur_neighbor_list and "t" in cur_node[0] + cur_neigh[0] + neigh_neighbor[0]:
-                        sub_lan_set.add(frozenset([cur_node, cur_neigh, neigh_neighbor]))
-
-        fully_connected_sub_lan_set = set()
-
-        for triangle in sub_lan_set:
-            fully_connected_sub_lan = set(triangle)
-            for new_triangle in sub_lan_set:
-                is_fully_connected = True
-                for new_node in new_triangle:
-                    if new_node in fully_connected_sub_lan:
-                        continue
-                    for cur_node in fully_connected_sub_lan:
-                        if cur_node not in lan_map[new_node]:
+        for cur_node in node_set:
+            cur_neigh_list = lan_map[cur_node]
+            found = False
+            for i in range(len(cur_neigh_list), 2, -1):
+                for cur_combination in itertools.combinations(cur_neigh_list, i):
+                    cur_combination = [*cur_combination, cur_node]
+                    is_fully_connected = True
+                    for first_node, second_node in itertools.combinations(cur_combination, 2):
+                        if first_node not in lan_map[second_node]:
                             is_fully_connected = False
                             break
-                if is_fully_connected:
-                    fully_connected_sub_lan = fully_connected_sub_lan.union(new_triangle)
 
-            fully_connected_sub_lan_set.add(frozenset(fully_connected_sub_lan))
+                    if is_fully_connected:
+                        if len(biggest_connected_subset) < len(cur_combination):
+                            biggest_connected_subset = cur_combination
+                        found = True
+                        break
+                if found:
+                    break
 
-        fully_connected_sub_lan_list = list(fully_connected_sub_lan_set)
-        fully_connected_sub_lan_list.sort(key=lambda x: -len(x))
+        biggest_connected_subset = list(biggest_connected_subset)
+        biggest_connected_subset.sort()
 
-        biggest_fully_connected_subset = list(fully_connected_sub_lan_list[0])
-        biggest_fully_connected_subset.sort()
-
-        return ",".join(biggest_fully_connected_subset)
+        return ",".join(biggest_connected_subset)
 
 
 p2 = Part_2()
